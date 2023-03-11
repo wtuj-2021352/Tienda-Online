@@ -1,62 +1,36 @@
-const { response, request } = require('express');
-const Facturas = require('../models/facturas');
+const {response, request} = require('express');
+const Factura = require('../models/facturas');
+const Carrito = require('../models/carrito');
+const Producto = require('../models/productos');
 
-const getFacturas = async (req = request, res = response) => {
-
-    const query = { estado: true };
-
-    const listaFacturas = await Promise.all([
-        Facturas.countDocuments(query),
-        Facturas.find(query)
-    ]);
+const getFactura = async (req = request, res = response) => {
+    const factura = await Promise.all([
+        Factura.countDocuments(),
+        Factura.find()
+    ])
 
     res.json({
-        msg: 'Get API de Facturas', listaFacturas
-    });
+        msg: 'Facturas encontradas',
+        factura
+    })
 }
 
-const postFacturas = async (req = request, res = response) => {
-    const { nombre, nit, direccion, descripcion, total } = req.body;
-
-    const facturaDB = new Facturas({ nombre, nit, direccion, descripcion, total });
+const comprar = async (req = request, res = response) => {
+    const usuario = req.user._id;
+    const carrito = await Carrito.findOne({usuario: usuario});
+    const total = carrito.subtotal;
+    const detalle = carrito.producto;
+    const facturaDB = new Factura({usuario, total, detalle});
 
     await facturaDB.save();
 
-    res.json({
-        msg: 'POST API de Facturas',
+    res.status(201).json({
+        msg: 'Factura',
         facturaDB
-    });
-}
-
-const putFacturas = async (req = request, res = response) => {
-    const { id } = req.params;
-
-
-    const { _id, estado, ...resto } = req.body;
-
-
-    const facturaEditada = await Facturas.findByIdAndUpdate(id, resto);
-
-    res.json({
-        msg: 'PUT API de Facturas',
-        facturaEditada
-    });
-}
-
-const deleteFacturas = async (req = request, res = response) => {
-    const { id } = req.params;
-
-
-    const facturaEliminada = await Facturas.findByIdAndDelete(id);
-    res.json({
-        msg: 'DELETE API de Factura',
-        facturaEliminada
-    });
+    })
 }
 
 module.exports = {
-    getFacturas,
-    postFacturas,
-    putFacturas,
-    deleteFacturas
+    getFactura,
+    comprar
 }

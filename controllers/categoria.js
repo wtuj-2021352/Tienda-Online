@@ -1,66 +1,72 @@
-
 const { response, request } = require('express');
-
 const Categoria = require('../models/categoria');
 
-
+//Get categorias
 const getCategoria = async (req = request, res = response) => {
 
-    const query = { estado: true };
-
-    const listaCategoria = await Promise.all([
-        Categoria.countDocuments(query),
-        Categoria.find(query)
-    ]);
+    const listaCategorias = await Promise.all([
+        Categoria.countDocuments(),
+        Categoria.find()
+    ])
 
     res.json({
-        msg: 'Get API de Categorias', listaCategoria
-    });
+        msg: 'GET API DE CATEGORIAS',
+        listaCategorias
+    })
+
 }
 
+const getCategoriaById = async (req = request, res = response) => {
+    const { id } = req.params;
+    const categoria = await Categoria.findById(id).populate('categoria', 'nombre');
+    res.json({
+        msg: 'Categoria encontrada',
+        categoria
+    })
+}
 const postCategoria = async (req = request, res = response) => {
-    const { nombre, proveedor, descripcion } = req.body;
 
-    const categoriaDB = new Categoria({ nombre, proveedor, descripcion });
+    const { categoria, descripcion } = req.body;
+    const categoriaDB = new Categoria({ categoria, descripcion });
 
     await categoriaDB.save();
-
-    res.json({
-        msg: 'POST API de Categoria',
+    res.status(201).json({
+        msg: 'POST API CATEGORIA',
         categoriaDB
-    });
-}
+    })
 
+}
 const putCategoria = async (req = request, res = response) => {
+
     const { id } = req.params;
+    const { _id, ...resto } = req.body;
 
+    const categoriaEditada = await Categoria.findByIdAndUpdate(id, resto, { new: true });
 
-    const { _id, estado, ...resto } = req.body;
-
-
-    const categoriaEditada = await Categoria.findByIdAndUpdate(id, resto);
-
-    res.json({
-        msg: 'PUT API de Categoria',
+    res.status(201).json({
+        msg: 'PUT API CATEGORIA',
         categoriaEditada
-    });
+
+    })
+    
+
 }
-
 const deleteCategoria = async (req = request, res = response) => {
-    const { id } = req.params;
 
+    const { id } = req.params;
 
     const categoriaEliminada = await Categoria.findByIdAndDelete(id);
     res.json({
-        msg: 'DELETE API de Categoria',
+        msg: 'DELETE API DE CATEGORIAS',
         categoriaEliminada
-    });
+    })
+
 }
 
 module.exports = {
     getCategoria,
     postCategoria,
     putCategoria,
-    deleteCategoria
+    deleteCategoria,
+    getCategoriaById
 }
-
