@@ -1,40 +1,24 @@
-const { Router } = require('express');
+const {Router} = require('express');
 const { check } = require('express-validator');
-const { postFacturas, putFacturas, deleteFacturas, getFacturas } = require('../controllers/facturas');
-const { validarCampos } = require('../middlewares/validar-campos');
 
+const { getFactura, comprar } = require('../controllers/facturas');
+
+const { validarCampos } = require('../middlewares/validar-campos');
+const { validarJWT } = require('../middlewares/validar-jwt');
+const { esAdminRole } = require('../middlewares/validar-roles');
 
 const router = Router();
 
-router.get('/mostrar', getFacturas)
+router.get('/mostrar',[
+    validarJWT,
+    esAdminRole
+], getFactura);
+
+router.get('/comprar',[
+    validarJWT,
+    validarCampos,
+    esAdminRole
+], comprar)
 
 
-router.post('/agregar', [
-    check('nombre', 'El nombre es obligatorio').not().isEmpty(),
-    check('nit', 'El nit es obligatorio').not().isEmpty(),
-    check('descripcion', 'La descripcion es obligatoria').not().isEmpty(),
-    check('direccion', 'La direccion no puede ir vacia').not().isEmpty(),
-    check('total', 'El total es obligatorio').not().isEmpty(),
-
-    validarCampos
-
-], postFacturas)
-
-
-router.put('/editar/:id', [
-    check('id', 'No es un ID valido').isMongoId(),
-
-    validarCampos
-], putFacturas)
-
-
-router.delete('/delete/:id', [
-    check('id', 'No es un ID valido').isMongoId(),
-
-    
-    validarCampos
-], deleteFacturas)
-
-
-
-module.exports = router;
+module.exports = router

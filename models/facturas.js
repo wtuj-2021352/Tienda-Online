@@ -1,32 +1,24 @@
-const{ Schema, model } = require('mongoose');
+const { Schema, model } = require('mongoose');
 
 const FacturaSchema = Schema({
-    nombre: {
-        type: String,
-        required: [true, 'El nombre del cliente es obligatorio']
-    },
-    nit: {
-        type: String,
-        required: [true, 'El NiT es obligatorio']
-    },
-    direccion: {
-        type: String,
-        required: [true, 'La direccion es obligatoria']
-    },
-    descripcion: {
-        type: String,
-        required: [true, 'La descripcion es obligatoria']
+    usuario: {
+        type: Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: true
+    }, 
+    fecha:{
+        type: Date,
+        required: true,
+        default: Date()
     },
     total: {
-        type: String,
-        required: [true, 'El total es obligatorio']
+        type: Number,
+        default: 0
     },
-    estado: {
-        type: Boolean,
-        default: true
-    }  
-
+    detalle:{
+        type: Array,
+        default: []
+    }
 });
 
-
-module.exports = model('Factura',FacturaSchema)
+module.exports = model('Factura', FacturaSchema);
